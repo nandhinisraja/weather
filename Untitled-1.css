@@ -1,0 +1,163 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #12263a;
+  background: linear-gradient(160deg, #cfe8ff 0%, #8ec5fc 55%, #5b9ee1 100%);
+}
+
+.app {
+  width: 100%;
+  max-width: 400px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #0b2540;
+}
+
+/* Search */
+.search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 16px;
+  font-size: 1rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #12263a;
+  outline: none;
+  box-shadow: 0 4px 14px rgba(11, 37, 64, 0.12);
+}
+
+.search input:focus {
+  border-color: #1d6fd1;
+}
+
+.search button {
+  padding: 13px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  background: #0b2540;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search button:hover {
+  background: #1d6fd1;
+}
+
+.search button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.search button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status message */
+.message {
+  text-align: center;
+  min-height: 24px;
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+  color: #0b2540;
+}
+
+.message.error {
+  color: #a11a1a;
+  font-weight: 600;
+}
+
+/* Weather card */
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(11, 37, 64, 0.2);
+}
+
+.card.hidden {
+  display: none;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#city-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.condition {
+  margin-top: 4px;
+  font-size: 1rem;
+  text-transform: capitalize;
+  color: #4a6075;
+}
+
+.temperature {
+  margin: 8px 0 22px;
+  font-size: 4.2rem;
+  font-weight: 300;
+  line-height: 1;
+  color: #0b2540;
+}
+
+.details {
+  display: flex;
+  gap: 10px;
+}
+
+.detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 6px;
+  border-radius: 12px;
+  background: #eef5fd;
+}
+
+.detail-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #4a6075;
+}
+
+@media (max-width: 380px) {
+  .temperature { font-size: 3.4rem; }
+  .details { flex-direction: column; }
+}

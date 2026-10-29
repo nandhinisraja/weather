@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #12263a;
+    background: linear-gradient(160deg, #cfe8ff 0%, #8ec5fc 50%, #4f8fd8 100%);
+  }
+
+  .app { width: 100%; max-width: 420px; }
+
+  h1 {
+    text-align: center;
+    font-size: 1.9rem;
+    color: #0b2540;
+    margin-bottom: 18px;
+  }
+
+  /* Search bar */
+  .search { display: flex; gap: 8px; margin-bottom: 12px; }
+  .search input {
+    flex: 1; min-width: 0;
+    padding: 13px 16px;
+    font-size: 1rem;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: #fff;
+    color: #12263a;
+    outline: none;
+    box-shadow: 0 4px 14px rgba(11, 37, 64, 0.12);
+  }
+  .search input:focus { border-color: #1d6fd1; }
+  .search button {
+    padding: 13px 20px;
+    font-size: 1rem; font-weight: 600;
+    border: none; border-radius: 12px;
+    background: #0b2540; color: #fff;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .search button:hover { background: #1d6fd1; }
+  .search button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .search button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+  /* API key helper */
+  .key-box { margin-bottom: 12px; font-size: 0.85rem; color: #0b2540; }
+  .key-box summary { cursor: pointer; text-align: center; }
+  .key-row { display: flex; gap: 8px; margin-top: 8px; }
+  .key-row input {
+    flex: 1; min-width: 0; padding: 9px 12px;
+    border: 1px solid #9bbbe0; border-radius: 10px; font-size: 0.9rem;
+  }
+  .key-row button {
+    padding: 9px 14px; border: none; border-radius: 10px;
+    background: #1d6fd1; color: #fff; font-weight: 600; cursor: pointer;
+  }
+
+  /* Status message */
+  .message { text-align: center; min-height: 24px; margin-bottom: 12px; font-size: 0.95rem; color: #0b2540; }
+  .message.error {
+    color: #8f1414; font-weight: 600;
+    background: #ffe3e3; border-radius: 10px; padding: 10px 12px;
+  }
+
+  /* Weather card */
+  .card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 26px 24px 22px;
+    box-shadow: 0 14px 34px rgba(11, 37, 64, 0.22);
+  }
+  .card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  #city-name { font-size: 1.5rem; font-weight: 700; }
+  .date { margin-top: 2px; font-size: 0.9rem; color: #5a6f84; }
+  .card-top img { width: 90px; height: 90px; flex-shrink: 0; }
+
+  .temp-row { display: flex; align-items: flex-end; gap: 14px; margin: 4px 0 20px; }
+  .temperature { font-size: 4.4rem; font-weight: 300; line-height: 1; color: #0b2540; }
+  .condition-wrap { padding-bottom: 6px; }
+  .condition { font-size: 1.15rem; font-weight: 600; text-transform: capitalize; }
+  .range { font-size: 0.9rem; color: #5a6f84; margin-top: 2px; }
+
+  .details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .detail {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; border-radius: 14px; background: #eef5fd;
+  }
+  .detail .ico { font-size: 1.4rem; }
+  .detail .val { display: block; font-size: 1.05rem; font-weight: 700; }
+  .detail .lbl { display: block; font-size: 0.78rem; color: #5a6f84; }
+  .detail.main { background: #dcebfb; }
+
+  .footer { margin-top: 14px; text-align: center; font-size: 0.75rem; color: #7b8da0; }
+
+  @media (max-width: 380px) {
+    .temperature { font-size: 3.5rem; }
+    .details { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>Weather</h1>
+
+  <form id="search-form" class="search" autocomplete="off">
+    <input type="text" id="city-input" placeholder="Enter a city, e.g. Chennai" aria-label="City name" required>
+    <button type="submit" id="search-btn">Search</button>
+  </form>
+
+  <details class="key-box" id="key-box">
+    <summary>API key settings</summary>
+    <div class="key-row">
+      <input type="text" id="key-input" placeholder="Paste your OpenWeatherMap API key" aria-label="API key">
+      <button type="button" id="key-save">Save</button>
+    </div>
+  </details>
+
+  <p id="message" class="message" role="status">Type a city name to see its current weather.</p>
+
+  <section id="weather-card" class="card" aria-live="polite" hidden>
+    <div class="card-top">
+      <div>
+        <h2 id="city-name"></h2>
+        <p id="date" class="date"></p>
+      </div>
+      <img id="weather-icon" alt="">
+    </div>
+
+    <div class="temp-row">
+      <p id="temperature" class="temperature"></p>
+      <div class="condition-wrap">
+        <p id="condition" class="condition"></p>
+        <p id="range" class="range"></p>
+      </div>
+    </div>
+
+    <div class="details">
+      <div class="detail main"><span class="ico">💧</span><div><span class="val" id="humidity"></span><span class="lbl">Humidity</span></div></div>
+      <div class="detail main"><span class="ico">🌡️</span><div><span class="val" id="feels-like"></span><span class="lbl">Feels like</span></div></div>
+      <div class="detail"><span class="ico">💨</span><div><span class="val" id="wind"></span><span class="lbl">Wind</span></div></div>
+      <div class="detail"><span class="ico">🧭</span><div><span class="val" id="pressure"></span><span class="lbl">Pressure</span></div></div>
+      <div class="detail"><span class="ico">🌅</span><div><span class="val" id="sunrise"></span><span class="lbl">Sunrise</span></div></div>
+      <div class="detail"><span class="ico">🌇</span><div><span class="val" id="sunset"></span><span class="lbl">Sunset</span></div></div>
+    </div>
+
+    <p class="footer">Data from OpenWeatherMap</p>
+  </section>
+</main>
+
+<script>
+  // Option 1: paste your key here. Option 2: use "API key settings" on the page.
+  const API_KEY = "YOUR_API_KEY_HERE";
+  const API_URL = "https://api.openweathermap.org/data/2.5/weather";
+
+  const $ = (id) => document.getElementById(id);
+  const form = $("search-form"), cityInput = $("city-input"), searchBtn = $("search-btn");
+  const message = $("message"), card = $("weather-card");
+  const keyBox = $("key-box"), keyInput = $("key-input"), keySave = $("key-save");
+
+  // ---- API key handling (constant first, then browser storage) ----
+  function getKey() {
+    if (API_KEY && API_KEY !== "YOUR_API_KEY_HERE") return API_KEY;
+    try { return localStorage.getItem("owm_key") || ""; } catch (e) { return ""; }
+  }
+  keySave.addEventListener("click", () => {
+    const k = keyInput.value.trim();
+    if (!k) return showMessage("Paste a key first.", true);
+    try { localStorage.setItem("owm_key", k); } catch (e) { /* storage unavailable */ }
+    sessionKey = k;
+    keyBox.open = false;
+    showMessage("API key saved. Now search for a city.");
+  });
+  let sessionKey = "";
+  const activeKey = () => getKey() || sessionKey;
+
+  // ---- Helpers ----
+  function showMessage(text, isError = false) {
+    message.textContent = text;
+    message.classList.toggle("error", isError);
+  }
+  function setLoading(on) {
+    searchBtn.disabled = on;
+    searchBtn.textContent = on ? "Loading..." : "Search";
+  }
+  // Convert a UTC timestamp to the searched city's local time
+  function cityTime(ts, tz, opts) {
+    return new Date((ts + tz) * 1000).toLocaleString("en-US", { ...opts, timeZone: "UTC" });
+  }
+
+  // ---- Fetch + parse JSON ----
+  async function fetchWeather(city, key) {
+    const url = `${API_URL}?q=${encodeURIComponent(city)}&appid=${key}&units=metric`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 404) throw new Error("City not found. Check the spelling and try again.");
+      if (response.status === 401) throw new Error("Invalid API key. New keys can take up to 2 hours to activate.");
+      if (response.status === 429) throw new Error("Too many requests. Wait a minute and try again.");
+      throw new Error(data.message || "Something went wrong. Please try again.");
+    }
+    return data;
+  }
+
+  // ---- Update the DOM ----
+  function displayWeather(d) {
+    const w = d.weather[0], tz = d.timezone;
+    $("city-name").textContent = `${d.name}, ${d.sys.country}`;
+    $("date").textContent = cityTime(d.dt, tz, { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    $("weather-icon").src = `https://openweathermap.org/img/wn/${w.icon}@2x.png`;
+    $("weather-icon").alt = w.main;
+    $("temperature").textContent = `${Math.round(d.main.temp)}°C`;
+    $("condition").textContent = w.description;
+    $("range").textContent = `H: ${Math.round(d.main.temp_max)}°  L: ${Math.round(d.main.temp_min)}°`;
+    $("humidity").textContent = `${d.main.humidity}%`;
+    $("feels-like").textContent = `${Math.round(d.main.feels_like)}°C`;
+    $("wind").textContent = `${d.wind.speed} m/s`;
+    $("pressure").textContent = `${d.main.pressure} hPa`;
+    $("sunrise").textContent = cityTime(d.sys.sunrise, tz, { hour: "numeric", minute: "2-digit" });
+    $("sunset").textContent = cityTime(d.sys.sunset, tz, { hour: "numeric", minute: "2-digit" });
+    card.hidden = false;
+    showMessage("");
+  }
+
+  // ---- Handle search ----
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const city = cityInput.value.trim();
+    const key = activeKey();
+    if (!city) return showMessage("Please enter a city name.", true);
+    if (!key) {
+      keyBox.open = true;
+      return showMessage("Add your OpenWeatherMap API key first.", true);
+    }
+    setLoading(true);
+    card.hidden = true;
+    showMessage("Fetching weather...");
+    try {
+      displayWeather(await fetchWeather(city, key));
+    } catch (err) {
+      showMessage(err instanceof TypeError
+        ? "Network error. Check your internet connection and open this file in a normal browser tab."
+        : err.message, true);
+    } finally {
+      setLoading(false);
+    }
+  });
+</script>
+</body>
+</html>
